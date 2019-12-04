@@ -43,7 +43,7 @@ const getIntCodes = input => {
 const main = async () => {
   console.log('## DAY 2 ##');
 
-  const rawInput = await readFilePromise('./day_2_input.txt', { encoding: 'utf-8' });
+  const rawInput = await readFilePromise('./day02_input.txt', { encoding: 'utf-8' });
   const intCodes = getIntCodes(rawInput);
 
   const position0Value = part1(intCodes);

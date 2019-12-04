@@ -41,7 +41,7 @@ const getRecursiveFuel = mass => {
 const main = async () => {
   console.log('## DAY 1 ##');
 
-  const rawInput = await readFilePromise('./day_1_input.txt', { encoding: 'utf-8' });
+  const rawInput = await readFilePromise('./day01_input.txt', { encoding: 'utf-8' });
   const masses = rawInput.split('\n');
   const regularFuel = part1(masses);
   console.log(regularFuel);
