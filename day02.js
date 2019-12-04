@@ -3,14 +3,12 @@ const util = require('util');
 
 const readFilePromise = util.promisify(fs.readFile);
 
-const part1 = intCodes => {
-  console.log('Part 1:');
-
+const compute = (intCodes, noun, verb) => {
   let position = 0;
   const codes = intCodes.map(code => parseInt(code));
 
-  codes[1] = 12;
-  codes[2] = 2;
+  codes[1] = noun;
+  codes[2] = verb;
 
   while (codes[position] !== 99) {
     const opCode = codes[position];
@@ -29,10 +27,24 @@ const part1 = intCodes => {
   }
 
   return codes[0];
+}
+
+const part1 = intCodes => {
+  console.log('Part 1:');
+  return compute(intCodes, 12, 2);
 };
 
 const part2 = intCodes => {
   console.log('Part 2:');
+
+  for (let i = 0; i <= 99; i += 1) {
+    for (let j = 0; j <= 99; j += 1) {
+      const result = compute(intCodes, i, j);
+      if (result === 19690720) {
+        return [i, j];
+      }
+    }
+  }
 };
 
 const getIntCodes = input => {
@@ -48,6 +60,9 @@ const main = async () => {
 
   const position0Value = part1(intCodes);
   console.log(position0Value);
+
+  const nounVerbTuple = part2(intCodes);
+  console.log(100 * nounVerbTuple[0] + nounVerbTuple[1]);
 };
 
 main();
