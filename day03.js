@@ -5,7 +5,7 @@ const readFilePromise = util.promisify(fs.readFile);
 const day = '03';
 
 const reduceCoordinates = (previousCoordinates, currentInstruction) => {
-  const { x, y } = previousCoordinates[previousCoordinates.length - 1];
+  const { x, y, steps } = previousCoordinates[previousCoordinates.length - 1];
 
   const direction = currentInstruction.charAt(0);
   const distance = parseInt(currentInstruction.slice(1));
@@ -20,6 +20,7 @@ const reduceCoordinates = (previousCoordinates, currentInstruction) => {
         // Parentheses are important here!
         // Without them, x is coerced to a boolean before adding i!
         y: y + (positive ? i : -i),
+        steps: steps + i,
       });
     } else {
       previousCoordinates.push({
@@ -27,6 +28,7 @@ const reduceCoordinates = (previousCoordinates, currentInstruction) => {
         // Without them, x is coerced to a boolean before adding i!
         x: x + (positive ? i : -i),
         y: y,
+        steps: steps + i,
       });
     }
   }
@@ -35,7 +37,7 @@ const reduceCoordinates = (previousCoordinates, currentInstruction) => {
 };
 
 const getCoordinates = wire => {
-  const origin = { x: 0, y: 0 };
+  const origin = { x: 0, y: 0, steps: 0 };
   return wire.reduce(reduceCoordinates, [origin]);
 }
 
@@ -50,7 +52,10 @@ const findIntersections = (wire1, wire2) => {
       return w1.x === w2.x && w1.y === w2.y;
     });
     if (intersect) {
-      intersections.push(w1);
+      intersections.push({
+        ...w1,
+        steps: w1.steps + intersect.steps,
+      });
     }
   });
 
@@ -78,9 +83,21 @@ const part1 = (wire1, wire2) => {
   return shortestManhattanDistance;
 };
 
-// const part2 = () => {
-//   console.log('Part 2:');
-// };
+const part2 = (wire1, wire2) => {
+  console.log('Part 2:');
+
+  const wire1Coordinates = getCoordinates(wire1);
+  const wire2Coordinates = getCoordinates(wire2);
+  const intersections = findIntersections(wire1Coordinates, wire2Coordinates);
+
+  const fewestSteps = intersections.reduce((steps, intersection) => {
+    if (steps === 0 || intersection.steps < steps) {
+      return intersection.steps;
+    }
+    return steps;
+  }, 0);
+  return fewestSteps;
+};
 
 const main = async () => {
   console.log(`## DAY ${day} ##`);
@@ -91,6 +108,8 @@ const main = async () => {
   const shortestDistanceFromOrigin = part1(wire1, wire2);
   console.log('shortest manhattan distance from origin', shortestDistanceFromOrigin);
 
+  const fewestSteps = part2(wire1, wire2);
+  console.log('fewest steps', fewestSteps);
 };
 
 main();
