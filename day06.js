@@ -69,7 +69,18 @@ const findNode = (tree, name) => {
     }
     return accum;
   }, null);
-}
+};
+
+const findNearestCommonAncestor = (orbit1, orbit2) => {
+  let current = orbit1.parent;
+  let hasOrbit2 = !!findNode(current, orbit2.name);
+  while (!hasOrbit2) {
+    current = current.parent;
+    hasOrbit2 = !!findNode(current, orbit2.name);
+  }
+
+  return current;
+};
 
 const main = async () => {
   console.log(`## Day ${DAY} ## Part 1`);
@@ -88,10 +99,10 @@ const main = async () => {
   console.log('Part 2');
   const santa = findNode(tree, 'SAN');
   const you = findNode(tree, 'YOU');
-  console.log(`santa at ${santa.name}, depth ${santa.depth}, orbitting ${santa.parent.name}`);
-  console.log(`you at ${you.name}, depth ${you.depth}, orbitting ${you.parent.name}`);
 
-  // TODO: find nearest common ancestor of SANTA and YOU
+  const nca = findNearestCommonAncestor(you, santa);
+  const transfers = Math.abs((nca.depth - (you.depth - 1))) + Math.abs((nca.depth - (santa.depth - 1)));
+  console.log(`minimum required orbital transfers ${transfers}`);
 };
 
 main();
