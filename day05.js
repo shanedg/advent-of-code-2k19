@@ -17,7 +17,8 @@ const parseIntCodes = input => {
  * Run the IntCode computer against the provided instructions.
  * @param {*} intCodes
  */
-const compute = (intCodes) => {
+const compute = (intCodes, systemId = 1) => {
+  const outputs = [];
   let position = 0;
   const instructions = [...intCodes];
 
@@ -56,19 +57,48 @@ const compute = (intCodes) => {
       instructions[param3] = (mode1 ? param1 : instructions[param1]) * (mode2 ? param2 : instructions[param2]);
       instructionLength = 4;
     } else if (opCode === 3) {
-      instructions[param1] = 1;
+      instructions[param1] = systemId;
       instructionLength = 2;
     } else if (opCode === 4) {
-      console.log(`outputting value at position given by ${param1}: ${(mode1 ? param1 : instructions[param1])}`);
+      outputs.push(mode1 ? param1 : instructions[param1]);
       instructionLength = 2;
+    } else if (opCode === 5) {
+      const test = mode1 ? param1 : instructions[param1];
+      if (test !== 0) {
+        const newPointer = mode2 ? param2 : instructions[param2];
+        position = newPointer;
+        instructionLength = 0;
+      } else {
+        instructionLength = 3;
+      }
+    } else if (opCode === 6) {
+      const test = mode1 ? param1 : instructions[param1];
+      if (test === 0) {
+        const newPointer = mode2 ? param2 : instructions[param2];
+        position = newPointer;
+        instructionLength = 0;
+      } else {
+        instructionLength = 3;
+      }
+    } else if (opCode === 7) {
+      const test1 = mode1 ? param1 : instructions[param1];
+      const test2 = mode2 ? param2 : instructions[param2];
+      instructions[param3] = (test1 < test2) ? 1 : 0;
+      instructionLength = 4;
+    } else if (opCode === 8) {
+      const test1 = mode1 ? param1 : instructions[param1];
+      const test2 = mode2 ? param2 : instructions[param2];
+      instructions[param3] = (test1 === test2) ? 1 : 0;
+      instructionLength = 4;
     } else {
       console.log('error bad opcode!', opCode);
+      instructionLength = 0;
     }
 
     position += instructionLength;
   }
 
-  return instructions[0];
+  return outputs;
 }
 
 /**
@@ -82,9 +112,14 @@ const main = async () => {
     { encoding: 'utf-8' }
   );
   const intCodes = parseIntCodes(rawInput);
-  console.log(intCodes);
 
-  compute(intCodes);
+  const airConditionerOutput = compute(intCodes);
+  console.log(airConditionerOutput);
+  console.assert(airConditionerOutput.pop() === 16574641);
+
+  console.log('Part 2');
+  const thermalRadiatorDiagnostic = compute(intCodes, 5);
+  console.log(thermalRadiatorDiagnostic);
 };
 
 main();
