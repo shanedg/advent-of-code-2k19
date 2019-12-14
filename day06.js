@@ -4,28 +4,50 @@ const util = require('util');
 const DAY = '06';
 const readFilePromise = util.promisify(fs.readFile);
 
-const search = (name, orbitMapData) => {
-  // TODO: this is all backwards:
-  // every orbital relationship has only 1 _PARENT_
-  // but may have more 0 or more _CHILDREN_
+const search = (name, orbitMap, depth = 0) => {
+  const children = [];
+  const orbitPattern = new RegExp(`^${name}\\)`, 'i');
 
-  // const orbitPattern = new RegExp(`^${name}\\)`, 'i');
-  // const orbitIndex = orbitMapData.findIndex(orbit => orbitPattern.test(orbit));
+  let index = orbitMap.findIndex(o => orbitPattern.test(o));
+  if (index === -1) {
+    return {
+      name,
+      children: null,
+      depth,
+    };
+  }
 
-  // if (orbitIndex !== null && orbitMapData.length > 0) {
-  //   const orbit = orbitMapData.splice(orbitIndex, 1);
-  //   const directOrbit = orbit[0].split(')')[1];
+  while (index !== -1 && orbitMap.length > 0) {
+    const orbit = orbitMap.splice(index, 1)[0];
+    const directOrbit = orbit.split(')')[1];
+    const orbittedBy = search(directOrbit, orbitMap, (depth + 1));
+    if (orbittedBy) {
+      children.push(orbittedBy);
+    }
+    index = orbitMap.findIndex(o => orbitPattern.test(o));
+  }
 
-  //   return {
-  //     name,
-  //     child: search(directOrbit, orbitMapData),
-  //   };
-  // }
+  if (children.length > 0) {
+  }
 
-  // return {
-  //   name,
-  //   child: null,
-  // };
+  return {
+    name,
+    children,
+    depth,
+  };
+};
+
+const countOrbits = (node) => {
+  if (node.children === null || node.children.length === 0) {
+  return node.depth;
+  }
+
+  let total = node.depth;
+  node.children.forEach(child => {
+    total += countOrbits(child);
+  });
+
+  return total;
 };
 
 const main = async () => {
@@ -37,8 +59,10 @@ const main = async () => {
   );
   const orbits = input.split('\n').filter(orbitalRelationship => orbitalRelationship !== '');
 
-  const result = search('COM', orbits);
-  // console.log(JSON.stringify(result, null, 2));
+  const tree = search('COM', orbits);
+  const totalOrbits = countOrbits(tree);
+  console.log(`total number of direct and indrect orbits ${totalOrbits}`);
+  console.assert(totalOrbits === 322508);
 };
 
 main();
